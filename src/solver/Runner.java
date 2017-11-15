@@ -25,7 +25,7 @@ public class Runner {
 	/** The default solver to use. */
 	public static String DEFAULT_SOLVER = "solver.MySolver";
 	/** The name of the solver class that will be used. */
-	private static String solverName = null;
+	private static String solverName = "solver.MySolver";
 	
 	/** Whether to re-create the solver for every simulation. */
 	public static boolean RECREATE_SOLVER = true;

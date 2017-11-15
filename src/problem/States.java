@@ -20,12 +20,13 @@ public class States {
         int maxArray = maxManufacturing * 2 + 1;
 
         states = new double[maxArray][maxArray];
+        prevstates = new double[maxArray][maxArray];
         valid = new boolean[maxArray][maxArray];
 
         for (int i = 0; i < maxArray; i++) {
             for (int j = 0; j < maxArray; j++) {
                 states[i][j] = 0;
-                valid[i][j] = checkValid(new int[]{i,j});
+                valid[i][j] = checkValid(new int[]{i-maxManufacturing,j-maxManufacturing});
             }
         }
 
@@ -42,7 +43,7 @@ public class States {
             }
         }
 
-        return pos < maxManufacturing && neg < maxManufacturing;
+        return pos <= maxManufacturing && neg <= maxManufacturing;
     }
 
     public void setStates() {

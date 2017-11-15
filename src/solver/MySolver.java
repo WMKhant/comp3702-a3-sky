@@ -19,6 +19,8 @@ public class MySolver implements FundingAllocationAgent {
 	private ProblemSpec spec = new ProblemSpec();
 	private VentureManager ventureManager;
     private List<Matrix> probabilities;
+    private List<Double> sales;
+    private States states;
 
     private static double EPSILON = 0.00000000001;
 	
@@ -26,6 +28,7 @@ public class MySolver implements FundingAllocationAgent {
 	    this.spec = spec;
 		ventureManager = spec.getVentureManager();
         probabilities = spec.getProbabilities();
+        sales = spec.getSalePrices();
 	}
 	
 	public void doOfflineComputation() {
@@ -40,10 +43,24 @@ public class MySolver implements FundingAllocationAgent {
 		if (ventureManager.getName().equals("bronze")) {
 
 			// initialise state values
-			States states = new States(ventures, maxManufacturing);
+			states = new States(ventures, maxManufacturing);
+
+			for (int i = 0; i < states.states.length; i++) {
+				System.out.println(Arrays.toString(states.states[i]));
+			}
+
+			System.out.println("-------------------------------------");
+
+			for (int i = 0; i < states.states.length; i++) {
+				System.out.println(Arrays.toString(states.valid[i]));
+			}
 
 			// create actions
 			Actions actions = new Actions(ventures, maxManufacturing, maxFunding);
+
+			for (Action action : actions.actions) {
+				System.out.println(Arrays.toString(action.values));
+			}
 
 			// value iteration
 			boolean converged = false;
@@ -66,7 +83,7 @@ public class MySolver implements FundingAllocationAgent {
 
 						int[] state = new int[]{i,j};
 
-						List<Integer> values = new ArrayList<>();
+						List<Double> values = new ArrayList<>();
 
 						// for each action
 
@@ -74,16 +91,30 @@ public class MySolver implements FundingAllocationAgent {
 
 							double total = 0;
 
+							double pr = 0;
+
 							// for each previous state
 							for (int x = 0; x < maxArray; x++) {
 								for (int y = 0; y < maxArray; y++) {
 
+									if (!states.valid[x][y]) {
+										continue;
+									}
+
 									int[] prevstate = new int[]{x,y};
 
-									total += action.prob(state, prevstate) * (action.reward(state, prevstate) + disc * states.prevstates[i][j]);
+									double p = action.prob(state, prevstate, probabilities);
+
+									pr += p;
+
+									total += p *
+											(action.reward(state, prevstate, sales) + disc * states.prevstates[i][j]);
 
 								}
 							}
+
+							System.out.println("PROB: " + pr);
+							values.add(total);
 
 						}
 
@@ -99,10 +130,12 @@ public class MySolver implements FundingAllocationAgent {
 
 			}
 
+			for (int i = 0; i < states.states.length; i++) {
+				System.out.println(Arrays.toString(states.states[i]));
+			}
+
 
 		}
-
-
 
 	}
 	

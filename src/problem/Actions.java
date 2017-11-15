@@ -20,10 +20,10 @@ public class Actions {
     }
 
     private void createActions() {
-        for (int i = 0; i < maxManufacturing; i++) {
-            for (int j = 0; j < maxManufacturing; j++) {
+        for (int i = 0; i <= maxFunding; i++) {
+            for (int j = 0; j <= maxFunding; j++) {
                 if (checkValidAction(new int[]{i,j})) {
-                    actions.add(new Action(new int[]{i,j}));
+                    actions.add(new Action(new int[]{i,j}, maxManufacturing));
                 }
             }
         }
@@ -31,7 +31,7 @@ public class Actions {
 
     private boolean checkValidAction(int values[]) {
 
-        return Arrays.stream(values).sum() < maxManufacturing && Arrays.stream(values).allMatch((x) -> x < maxFunding);
+        return Arrays.stream(values).sum() <= maxManufacturing && Arrays.stream(values).allMatch((x) -> x <= maxFunding);
 
     }
 }
