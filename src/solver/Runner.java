@@ -20,15 +20,15 @@ public class Runner {
 	/** The default number of simulations to run. */
 	public static int DEFAULT_NUM_SIMULATIONS = 1;
 	/** The number of simulations to run. */
-	private static int numSimulations = 0; 
+	private static int numSimulations = 100;
 	
 	/** The default solver to use. */
 	public static String DEFAULT_SOLVER = "solver.MySolver";
 	/** The name of the solver class that will be used. */
-	private static String solverName = "solver.MySolver";
+	private static String solverName = null;
 	
 	/** Whether to re-create the solver for every simulation. */
-	public static boolean RECREATE_SOLVER = true;
+	public static boolean RECREATE_SOLVER = false;
 
 	public static void main(String[] args) throws Exception {
 		parseCommandLine(args);

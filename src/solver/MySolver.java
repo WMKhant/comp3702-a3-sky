@@ -63,11 +63,51 @@ public class MySolver implements FundingAllocationAgent {
             System.out.println(Arrays.toString(action.values));
         }
 
+        // calculate all rewards
+
+        double[][] rewards = new double[ventures][length];
+
+        for (int i = 0; i < ventures; i++) {
+            for (int x = 0; x < length; x++) {
+                double reward = 0;
+                for (int y = 0; y < length; y++) {
+                    reward += probabilities.get(i).get(x, y) * sales.get(i) * (0.6 * Math.min(x, y) - 0.25 * Math.max(y - x, 0));
+                }
+                rewards[i][x] = reward;
+            }
+        }
+
+        // calculate all probabilities
+
+        double[][][] probs = new double[ventures][length][length];
+        for (int i = 0; i < ventures; i++) {
+            for (int x = 0; x < length; x++) {
+                for (int y = 0; y < length; y++) {
+                    double pr = 0;
+                    if (y > x) {
+                        pr = 0;
+                    } else if (0 < y && y <= x) {
+                        pr = probabilities.get(i).get(x, x - y);
+                    } else if (y == 0) {
+                        double p = 0;
+                        for (int j = x; j < length; j++) {
+                            p += probabilities.get(i).get(x, j);
+                        }
+                        pr = p;
+                    }
+                    probs[i][x][y] = pr;
+                }
+            }
+        }
+
         // value iteration
         boolean converged = false;
 
+        int counter = 0;
+
         while (!converged) {
 
+            counter++;
             converged = true;
             states.setStates();
 
@@ -104,11 +144,11 @@ public class MySolver implements FundingAllocationAgent {
 
                                         int[] prevstate = (ventures == 2) ? new int[]{x, y} : new int[]{x, y, z};
 
-                                        double p = action.prob(state, prevstate, probabilities);
+                                        double p = action.prob(state, prevstate, probs);
 
                                         pr += p;
 
-                                        total += p * (action.reward(state, probabilities, sales) + disc * states.prevStates[i][j][k]);
+                                        total += p * (action.reward(state, rewards) + disc * states.prevStates[i][j][k]);
                                     }
                                 }
                             }
@@ -133,6 +173,7 @@ public class MySolver implements FundingAllocationAgent {
         for (int i = 0; i < states.states.length; i++) {
             System.out.println(Arrays.toString(Arrays.stream(states.states[i]).map((x) -> x[0]).toArray()));
         }
+        System.out.println("Iterations: " + counter);
     }
 
     public List<Integer> generateAdditionalFundingAmounts(List<Integer> manufacturingFunds,
