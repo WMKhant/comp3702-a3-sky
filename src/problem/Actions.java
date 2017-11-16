@@ -30,8 +30,6 @@ public class Actions {
     }
 
     private boolean checkValidAction(int values[]) {
-
-        return Arrays.stream(values).sum() <= maxManufacturing && Arrays.stream(values).allMatch((x) -> x <= maxFunding);
-
+        return Arrays.stream(values).sum() <= maxFunding;
     }
 }

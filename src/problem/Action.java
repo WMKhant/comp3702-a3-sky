@@ -14,34 +14,41 @@ public class Action {
         this.maxManufacturing = maxManufacturing;
     }
 
-    public double prob(int[] state, int[] prevstate, List<Matrix> probabilities) {
+    public double prob(int[] state, int[] prevState, List<Matrix> probabilities) {
 
         double prob = 1.0;
 
         for (int i = 0; i < state.length; i++) {
-            int x = Math.max(state[i] - maxManufacturing, 0) +  values[i] - Math.max(prevstate[i] - maxManufacturing, 0);
-            if (x < 0 || x >= maxManufacturing) {
+            int x = state[i] + values[i];
+            int y = prevState[i];
+            if (y > x || x > maxManufacturing) {
                 return 0;
+            } else if (0 < y && y <= x) {
+                prob *= probabilities.get(i).get(x, x - y);
+            } else if (y == 0) {
+                double p = 0;
+                for (int j = x; j <= maxManufacturing; j++) {
+                    p += probabilities.get(i).get(x, j);
+                }
+                prob *= p;
             }
-//            System.out.println(prevstate[i] + ", " + x);
-            prob *= probabilities.get(i).get(Math.max(prevstate[i] - maxManufacturing,0), x);
         }
 
-        System.out.println(prob);
         return prob;
 
     }
 
-    public double reward(int[] state, int[] prevstate, List<Double> sales) {
+    public double reward(int[] state, List<Matrix> probabilities, List<Double> sales) {
 
-        double profit = 0;
+        double reward = 0;
 
         for (int i = 0; i < state.length; i++) {
-            profit += 0.6 * sales.get(i) * (Math.max(state[i] - maxManufacturing, 0) - Math.max(prevstate[i] - maxManufacturing, 0) + values[i]);
-            profit -= 0.25 * sales.get(i) * Math.min(state[i] - maxManufacturing, 0);
+            for (int j = 0; j <= maxManufacturing; j++) {
+                reward += probabilities.get(i).get(state[i], j) * sales.get(i) * (0.6 * Math.min(state[i], j) - 0.25 * Math.max(j - state[i], 0));
+            }
         }
 
-        return profit;
+        return reward;
 
     }
 

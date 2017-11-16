@@ -2,11 +2,13 @@ package problem;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.util.Arrays;
+
 public class States {
 
     int maxManufacturing;
     public double[][] states;
-    public double[][] prevstates;
+    public double[][] prevStates;
     public boolean[][] valid;
 
     public States(int ventures, int maxManufacturing) {
@@ -17,39 +19,29 @@ public class States {
 
         this.maxManufacturing = maxManufacturing;
 
-        int maxArray = maxManufacturing * 2 + 1;
+        int length = maxManufacturing + 1;
 
-        states = new double[maxArray][maxArray];
-        prevstates = new double[maxArray][maxArray];
-        valid = new boolean[maxArray][maxArray];
+        states = new double[length][length];
+        prevStates = new double[length][length];
+        valid = new boolean[length][length];
 
-        for (int i = 0; i < maxArray; i++) {
-            for (int j = 0; j < maxArray; j++) {
+        for (int i = 0; i < length; i++) {
+            for (int j = 0; j < length; j++) {
                 states[i][j] = 0;
-                valid[i][j] = checkValid(new int[]{i-maxManufacturing,j-maxManufacturing});
+                valid[i][j] = checkValidState(new int[]{i,j});
             }
         }
 
     }
 
-    private boolean checkValid(int[] values) {
-        int pos = 0;
-        int neg = 0;
-        for (int i = 0; i < values.length; i++) {
-            if (values[i] > 0) {
-                pos += values[i];
-            } else {
-                neg -= values[i];
-            }
-        }
-
-        return pos <= maxManufacturing && neg <= maxManufacturing;
+    private boolean checkValidState(int[] values) {
+        return Arrays.stream(values).sum() <= maxManufacturing;
     }
 
     public void setStates() {
         for (int i = 0; i < states.length; i++) {
             for (int j = 0; j < states[0].length; j++) {
-                prevstates[i][j] = states[i][j];
+                prevStates[i][j] = states[i][j];
             }
         }
     }

@@ -21,6 +21,7 @@ public class MySolver implements FundingAllocationAgent {
     private List<Matrix> probabilities;
     private List<Double> sales;
     private States states;
+    private Actions actions;
 
     private static double EPSILON = 0.00000000001;
 	
@@ -36,7 +37,7 @@ public class MySolver implements FundingAllocationAgent {
 		int ventures = ventureManager.getNumVentures();
 		int maxFunding = ventureManager.getMaxAdditionalFunding();
 		int maxManufacturing = ventureManager.getMaxManufacturingFunds();
-		int maxArray = maxManufacturing * 2 + 1;
+		int length = maxManufacturing + 1;
 
 		double disc = spec.getDiscountFactor();
 
@@ -56,7 +57,7 @@ public class MySolver implements FundingAllocationAgent {
 			}
 
 			// create actions
-			Actions actions = new Actions(ventures, maxManufacturing, maxFunding);
+			actions = new Actions(ventures, maxManufacturing, maxFunding);
 
 			for (Action action : actions.actions) {
 				System.out.println(Arrays.toString(action.values));
@@ -72,8 +73,8 @@ public class MySolver implements FundingAllocationAgent {
 
 				// for each state (i,j)
 
-				for (int i = 0; i < maxArray; i++) {
-					for (int j = 0; j < maxArray; j++) {
+				for (int i = 0; i < length; i++) {
+					for (int j = 0; j < length; j++) {
 
 						// check valid state
 
@@ -94,8 +95,8 @@ public class MySolver implements FundingAllocationAgent {
 							double pr = 0;
 
 							// for each previous state
-							for (int x = 0; x < maxArray; x++) {
-								for (int y = 0; y < maxArray; y++) {
+							for (int x = 0; x < length; x++) {
+								for (int y = 0; y < length; y++) {
 
 									if (!states.valid[x][y]) {
 										continue;
@@ -107,8 +108,7 @@ public class MySolver implements FundingAllocationAgent {
 
 									pr += p;
 
-									total += p *
-											(action.reward(state, prevstate, sales) + disc * states.prevstates[i][j]);
+									total += p * (action.reward(state, probabilities, sales) + disc * states.prevStates[i][j]);
 
 								}
 							}
@@ -146,22 +146,45 @@ public class MySolver implements FundingAllocationAgent {
 
 		List<Integer> additionalFunding = new ArrayList<Integer>();
 
-		int totalManufacturingFunds = 0;
-		for (int i : manufacturingFunds) {
-			totalManufacturingFunds += i;
-		}
-		
-		int totalAdditional = 0;
-		for (int i = 0; i < ventureManager.getNumVentures(); i++) {
-			if (totalManufacturingFunds >= ventureManager.getMaxManufacturingFunds() ||
-			        totalAdditional >= ventureManager.getMaxAdditionalFunding()) {
-				additionalFunding.add(0);
-			} else {
-				additionalFunding.add(1);
-				totalAdditional ++;
-				totalManufacturingFunds ++;
+//		int totalManufacturingFunds = 0;
+//		for (int i : manufacturingFunds) {
+//			totalManufacturingFunds += i;
+//		}
+//
+//		int totalAdditional = 0;
+//		for (int i = 0; i < ventureManager.getNumVentures(); i++) {
+//			if (totalManufacturingFunds >= ventureManager.getMaxManufacturingFunds() ||
+//			        totalAdditional >= ventureManager.getMaxAdditionalFunding()) {
+//				additionalFunding.add(0);
+//			} else {
+//				additionalFunding.add(1);
+//				totalAdditional ++;
+//				totalManufacturingFunds ++;
+//			}
+//		}
+
+		double max = Double.MIN_VALUE;
+		Action best = null;
+
+		for (Action action : actions.actions) {
+
+			int i = manufacturingFunds.get(0) + action.values[0];
+			int j = manufacturingFunds.get(1) + action.values[1];
+
+			if (i + j <= ventureManager.getMaxManufacturingFunds()) {
+				if (states.states[i][j] > max) {
+					best = action;
+					max = states.states[i][j];
+				}
 			}
+
 		}
+
+		System.out.println(max);
+
+		additionalFunding.add(best.values[0]);
+		additionalFunding.add(best.values[1]);
+
 
 		return additionalFunding;
 	}
