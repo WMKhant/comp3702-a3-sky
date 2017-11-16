@@ -16,17 +16,30 @@ public class Actions {
         this.maxFunding = maxFunding;
         this.maxManufacturing = maxManufacturing;
         this.actions = new ArrayList<>();
-        createActions();
+        createActions(ventures);
     }
 
-    private void createActions() {
-        for (int i = 0; i <= maxFunding; i++) {
-            for (int j = 0; j <= maxFunding; j++) {
-                if (checkValidAction(new int[]{i,j})) {
-                    actions.add(new Action(new int[]{i,j}, maxManufacturing));
+    private void createActions(int ventures) {
+        if (ventures == 2) {
+            for (int i = 0; i <= maxFunding; i++) {
+                for (int j = 0; j <= maxFunding; j++) {
+                    if (checkValidAction(new int[]{i,j})) {
+                        actions.add(new Action(new int[]{i,j}, maxManufacturing));
+                    }
+                }
+            }
+        } else if (ventures == 3) {
+            for (int i = 0; i <= maxFunding; i++) {
+                for (int j = 0; j <= maxFunding; j++) {
+                    for (int k = 0; k <= maxFunding; k++) {
+                        if (checkValidAction(new int[]{i,j,k})) {
+                            actions.add(new Action(new int[]{i,j,k}, maxManufacturing));
+                        }
+                    }
                 }
             }
         }
+
     }
 
     private boolean checkValidAction(int values[]) {

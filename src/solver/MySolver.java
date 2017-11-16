@@ -15,136 +15,132 @@ import java.util.List;
 import problem.*;
 
 public class MySolver implements FundingAllocationAgent {
-	
-	private ProblemSpec spec = new ProblemSpec();
-	private VentureManager ventureManager;
+
+    private ProblemSpec spec = new ProblemSpec();
+    private VentureManager ventureManager;
     private List<Matrix> probabilities;
     private List<Double> sales;
     private States states;
     private Actions actions;
 
     private static double EPSILON = 0.00000000001;
-	
-	public MySolver(ProblemSpec spec) throws IOException {
-	    this.spec = spec;
-		ventureManager = spec.getVentureManager();
+
+    public MySolver(ProblemSpec spec) throws IOException {
+        this.spec = spec;
+        ventureManager = spec.getVentureManager();
         probabilities = spec.getProbabilities();
         sales = spec.getSalePrices();
-	}
-	
-	public void doOfflineComputation() {
+    }
 
-		int ventures = ventureManager.getNumVentures();
-		int maxFunding = ventureManager.getMaxAdditionalFunding();
-		int maxManufacturing = ventureManager.getMaxManufacturingFunds();
-		int length = maxManufacturing + 1;
+    public void doOfflineComputation() {
 
-		double disc = spec.getDiscountFactor();
+        int ventures = ventureManager.getNumVentures();
+        int maxFunding = ventureManager.getMaxAdditionalFunding();
+        int maxManufacturing = ventureManager.getMaxManufacturingFunds();
+        int length = maxManufacturing + 1;
+        int length2 = (ventures == 2) ? 1 : length;
 
-		if (ventureManager.getName().equals("bronze")) {
-
-			// initialise state values
-			states = new States(ventures, maxManufacturing);
-
-			for (int i = 0; i < states.states.length; i++) {
-				System.out.println(Arrays.toString(states.states[i]));
-			}
-
-			System.out.println("-------------------------------------");
-
-			for (int i = 0; i < states.states.length; i++) {
-				System.out.println(Arrays.toString(states.valid[i]));
-			}
-
-			// create actions
-			actions = new Actions(ventures, maxManufacturing, maxFunding);
-
-			for (Action action : actions.actions) {
-				System.out.println(Arrays.toString(action.values));
-			}
-
-			// value iteration
-			boolean converged = false;
-
-			while(!converged) {
-
-				converged = true;
-				states.setStates();
-
-				// for each state (i,j)
-
-				for (int i = 0; i < length; i++) {
-					for (int j = 0; j < length; j++) {
-
-						// check valid state
-
-						if (!states.valid[i][j]) {
-							continue;
-						}
-
-						int[] state = new int[]{i,j};
-
-						List<Double> values = new ArrayList<>();
-
-						// for each action
-
-						for (Action action : actions.actions) {
-
-							double total = 0;
-
-							double pr = 0;
-
-							// for each previous state
-							for (int x = 0; x < length; x++) {
-								for (int y = 0; y < length; y++) {
-
-									if (!states.valid[x][y]) {
-										continue;
-									}
-
-									int[] prevstate = new int[]{x,y};
-
-									double p = action.prob(state, prevstate, probabilities);
-
-									pr += p;
-
-									total += p * (action.reward(state, probabilities, sales) + disc * states.prevStates[i][j]);
-
-								}
-							}
-
-							System.out.println("PROB: " + pr);
-							values.add(total);
-
-						}
-
-						// set state value
-						double value = Collections.max(values);
-						if (Math.abs(states.states[i][j] - value) > EPSILON) {
-							converged = false;
-						}
-						states.states[i][j] = value;
-
-					}
-				}
-
-			}
-
-			for (int i = 0; i < states.states.length; i++) {
-				System.out.println(Arrays.toString(states.states[i]));
-			}
+        double disc = spec.getDiscountFactor();
 
 
-		}
+        // initialise state values
+        states = new States(ventures, maxManufacturing);
 
-	}
-	
-	public List<Integer> generateAdditionalFundingAmounts(List<Integer> manufacturingFunds,
-														  int numFortnightsLeft) {
-		// Example code that allocates an additional $10 000 to each venture.
-		// TODO Replace this with your own code.
+        for (int i = 0; i < states.states.length; i++) {
+            System.out.println(Arrays.toString(Arrays.stream(states.states[i]).map((x) -> x[0]).toArray()));
+        }
 
-		List<Integer> additionalFunding = new ArrayList<Integer>();
+        System.out.println("-------------------------------------");
+
+        for (int i = 0; i < states.states.length; i++) {
+            System.out.println(Arrays.toString(Arrays.stream(states.valid[i]).map((x) -> x[0]).toArray()));
+        }
+
+        // create actions
+        actions = new Actions(ventures, maxManufacturing, maxFunding);
+
+        for (Action action : actions.actions) {
+            System.out.println(Arrays.toString(action.values));
+        }
+
+        // value iteration
+        boolean converged = false;
+
+        while (!converged) {
+
+            converged = true;
+            states.setStates();
+
+            // for each state (i,j)
+
+            for (int i = 0; i < length; i++) {
+                for (int j = 0; j < length; j++) {
+                    for (int k = 0; k < length2; k++) {
+                        // check valid state
+
+                        if (!states.valid[i][j][k]) {
+                            continue;
+                        }
+
+                        int[] state = (ventures == 2) ? new int[]{i, j} : new int[]{i, j, k};
+
+                        List<Double> values = new ArrayList<>();
+
+                        // for each action
+
+                        for (Action action : actions.actions) {
+
+                            double total = 0;
+
+                            double pr = 0;
+
+                            // for each previous state
+                            for (int x = 0; x < length; x++) {
+                                for (int y = 0; y < length; y++) {
+                                    for (int z = 0; z < length2; z++) {
+                                        if (!states.valid[x][y][k]) {
+                                            continue;
+                                        }
+
+                                        int[] prevstate = (ventures == 2) ? new int[]{x, y} : new int[]{x, y, z};
+
+                                        double p = action.prob(state, prevstate, probabilities);
+
+                                        pr += p;
+
+                                        total += p * (action.reward(state, probabilities, sales) + disc * states.prevStates[i][j][k]);
+                                    }
+                                }
+                            }
+
+//                            System.out.println("PROB: " + pr);
+                            values.add(total);
+
+                        }
+
+                        // set state value
+                        double value = Collections.max(values);
+                        if (Math.abs(states.states[i][j][k] - value) > EPSILON) {
+                            converged = false;
+                        }
+                        states.states[i][j][k] = value;
+                    }
+                }
+            }
+
+        }
+
+        for (int i = 0; i < states.states.length; i++) {
+            System.out.println(Arrays.toString(Arrays.stream(states.states[i]).map((x) -> x[0]).toArray()));
+        }
+    }
+
+    public List<Integer> generateAdditionalFundingAmounts(List<Integer> manufacturingFunds,
+                                                          int numFortnightsLeft) {
+        // Example code that allocates an additional $10 000 to each venture.
+        // TODO Replace this with your own code.
+
+        List<Integer> additionalFunding = new ArrayList<Integer>();
 
 //		int totalManufacturingFunds = 0;
 //		for (int i : manufacturingFunds) {
@@ -163,30 +159,34 @@ public class MySolver implements FundingAllocationAgent {
 //			}
 //		}
 
-		double max = Double.MIN_VALUE;
-		Action best = null;
+        double max = Double.MIN_VALUE;
+        Action best = null;
 
-		for (Action action : actions.actions) {
+        for (Action action : actions.actions) {
 
-			int i = manufacturingFunds.get(0) + action.values[0];
-			int j = manufacturingFunds.get(1) + action.values[1];
+            int i = manufacturingFunds.get(0) + action.values[0];
+            int j = manufacturingFunds.get(1) + action.values[1];
+            int k = (manufacturingFunds.size() == 2) ? 0 : manufacturingFunds.get(2) + action.values[2];
 
-			if (i + j <= ventureManager.getMaxManufacturingFunds()) {
-				if (states.states[i][j] > max) {
-					best = action;
-					max = states.states[i][j];
-				}
-			}
+            if (i + j <= ventureManager.getMaxManufacturingFunds()) {
+                if (states.states[i][j][k] > max) {
+                    best = action;
+                    max = states.states[i][j][k];
+                }
+            }
 
-		}
+        }
 
-		System.out.println(max);
+//        System.out.println(max);
 
-		additionalFunding.add(best.values[0]);
-		additionalFunding.add(best.values[1]);
+        additionalFunding.add(best.values[0]);
+        additionalFunding.add(best.values[1]);
+        if (manufacturingFunds.size() == 3) {
+            additionalFunding.add(best.values[2]);
+        }
 
 
-		return additionalFunding;
-	}
+        return additionalFunding;
+    }
 
 }
