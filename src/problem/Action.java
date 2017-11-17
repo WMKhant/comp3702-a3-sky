@@ -50,6 +50,10 @@ public class Action {
 
         double reward = 0;
 
+        if (Arrays.stream(state).sum() + Arrays.stream(values).sum() > maxManufacturing) {
+            return 0;
+        }
+
         for (int i = 0; i < state.length; i++) {
             int x = state[i];
 //            for (int y = 0; y <= maxManufacturing; y++) {

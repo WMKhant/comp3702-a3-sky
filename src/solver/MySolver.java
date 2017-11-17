@@ -46,24 +46,24 @@ public class MySolver implements FundingAllocationAgent {
         // initialise state values
         states = new States(ventures, maxManufacturing);
 
-        for (int i = 0; i < states.states.length; i++) {
-            for (int j = 0; j < states.states[0].length; j++) {
-                System.out.println(Arrays.toString(states.states[i][j]));
-            }
-        }
-
-        System.out.println("-------------------------------------");
-
-        for (int i = 0; i < states.states.length; i++) {
-            System.out.println(Arrays.toString(Arrays.stream(states.valid[i]).map((x) -> x[0]).toArray()));
-        }
+//        for (int i = 0; i < states.states.length; i++) {
+//            for (int j = 0; j < states.states[0].length; j++) {
+//                System.out.println(Arrays.toString(states.states[i][j]));
+//            }
+//        }
+//
+//        System.out.println("-------------------------------------");
+//
+//        for (int i = 0; i < states.states.length; i++) {
+//            System.out.println(Arrays.toString(Arrays.stream(states.valid[i]).map((x) -> x[0]).toArray()));
+//        }
 
         // create actions
         actions = new Actions(ventures, maxManufacturing, maxFunding);
 
-        for (Action action : actions.actions) {
-            System.out.println(Arrays.toString(action.values));
-        }
+//        for (Action action : actions.actions) {
+//            System.out.println(Arrays.toString(action.values));
+//        }
 
         // calculate all probabilities
 
@@ -102,17 +102,17 @@ public class MySolver implements FundingAllocationAgent {
             }
         }
 
-        System.out.println(Arrays.toString(rewards[0]));
-
-        System.out.println(Arrays.toString(rewards[1]));
+//        System.out.println(Arrays.toString(rewards[0]));
+////
+//        System.out.println(Arrays.toString(rewards[1]));
 
 //        System.out.println(Arrays.toString(rewards[2]));
 
 
 
-        for (int i = 0; i < probs[0].length; i++) {
-            System.out.println(Arrays.toString(probs[0][i]));
-        }
+//        for (int i = 0; i < probs[0].length; i++) {
+//            System.out.println(Arrays.toString(probs[0][i]));
+//        }
 
         // value iteration
         boolean converged = false;
@@ -152,7 +152,7 @@ public class MySolver implements FundingAllocationAgent {
                             for (int x = 0; x < length; x++) {
                                 for (int y = 0; y < length; y++) {
                                     for (int z = 0; z < length2; z++) {
-                                        if (!states.valid[x][y][k]) {
+                                        if (!states.valid[x][y][z]) {
                                             continue;
                                         }
 
@@ -168,6 +168,7 @@ public class MySolver implements FundingAllocationAgent {
                             }
 
 //                            System.out.println("PROB: " + pr);
+//                            System.out.println("TOT: " + total);
                             values.add(total);
 
                         }
@@ -184,30 +185,30 @@ public class MySolver implements FundingAllocationAgent {
 
         }
 
-        for (int i = 0; i < states.states.length; i++) {
-            for (int j = 0; j < states.states[0].length; j++) {
-                System.out.println(Arrays.toString(states.states[i][j]));
-            }
-        }
-        System.out.println("Iterations: " + counter);
+//        for (int i = 0; i < states.states.length; i++) {
+//            for (int j = 0; j < states.states[0].length; j++) {
+//                System.out.println(Arrays.toString(states.states[i][j]));
+//            }
+//        }
+//        System.out.println("Iterations: " + counter);
 
-        for (int k = 0; k < length2; k++) {
-            for (int j = 0; j < length; j++) {
-                for (int i = 0; i < length; i++) {
-                    if (i + j + k > maxManufacturing) {
-                        continue;
-                    }
-                    List<Integer> funds = new ArrayList<>();
-                    funds.add(i);
-                    funds.add(j);
-                    if (ventures == 3) {
-                        funds.add(k);
-                    }
-                    List<Integer> additional = generateAdditionalFundingAmounts(funds, 7);
-                    System.out.println(funds + " -> " + additional);
-                }
-            }
-        }
+//        for (int k = 0; k < length2; k++) {
+//            for (int j = 0; j < length; j++) {
+//                for (int i = 0; i < length; i++) {
+//                    if (i + j + k > maxManufacturing) {
+//                        continue;
+//                    }
+//                    List<Integer> funds = new ArrayList<>();
+//                    funds.add(i);
+//                    funds.add(j);
+//                    if (ventures == 3) {
+//                        funds.add(k);
+//                    }
+//                    List<Integer> additional = generateAdditionalFundingAmounts(funds, 7);
+//                    System.out.println("State: " + funds + " OptimalAction: " + additional);
+//                }
+//            }
+//        }
 //        System.out.println(generateAdditionalFundingAmounts(new ArrayList<Integer>(Arrays.asList(0,7,0)), 7));
     }
 
