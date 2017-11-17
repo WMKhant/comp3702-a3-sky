@@ -18,12 +18,16 @@ public class Action {
 
         double prob = 1.0;
 
+        if (Arrays.stream(state).sum() + Arrays.stream(values).sum() > maxManufacturing) {
+            return 0;
+        }
+
         for (int i = 0; i < state.length; i++) {
             int x = state[i] + values[i];
             int y = prevState[i];
-            if (x > maxManufacturing) {
-                return 0;
-            }
+//            if (x > maxManufacturing) {
+//                return 0;
+//            }
 //            if (y > x || x > maxManufacturing) {
 //                return 0;
 //            } else if (0 < y && y <= x) {

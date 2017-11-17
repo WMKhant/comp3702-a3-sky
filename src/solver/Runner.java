@@ -20,7 +20,7 @@ public class Runner {
 	/** The default number of simulations to run. */
 	public static int DEFAULT_NUM_SIMULATIONS = 1;
 	/** The number of simulations to run. */
-	private static int numSimulations = 100;
+	private static int numSimulations = 0;
 	
 	/** The default solver to use. */
 	public static String DEFAULT_SOLVER = "solver.MySolver";
@@ -32,17 +32,20 @@ public class Runner {
 
 	public static void main(String[] args) throws Exception {
 		parseCommandLine(args);
-		Class<?> clazz = Class.forName(solverName);
-		Constructor<?> ctor = clazz.getConstructor(ProblemSpec.class);
+//		Class<?> clazz = Class.forName(solverName);
+//		Constructor<?> ctor = clazz.getConstructor(ProblemSpec.class);
 		
 		ProblemSpec spec = new ProblemSpec(inputPath);
 
 		double totalProfit = 0;
+
+		int pass = 0;
 		
 		Simulator simulator = new Simulator(spec);
 		FundingAllocationAgent solver = null;
 		if (!RECREATE_SOLVER) {
-			solver = (FundingAllocationAgent)ctor.newInstance(spec);
+//			solver = (FundingAllocationAgent)ctor.newInstance(spec);
+			solver = new MySolver(spec);
 			solver.doOfflineComputation();
 		}
 		for (int simNo = 0; simNo < numSimulations; simNo++) {
@@ -52,7 +55,8 @@ public class Runner {
 			
 			simulator.reset();
 			if (RECREATE_SOLVER) {
-				solver = (FundingAllocationAgent)ctor.newInstance(spec);
+//				solver = (FundingAllocationAgent)ctor.newInstance(spec);
+				solver = new MySolver(spec);
 				solver.doOfflineComputation();
 			}
 			
@@ -61,6 +65,9 @@ public class Runner {
 			}
 
 			totalProfit += simulator.getTotalProfit();
+			if (simulator.getTotalProfit() >= 0.5 * spec.getNumFortnights() * spec.getVentureManager().getMaxManufacturingFunds()) {
+				pass++;
+			}
 			System.out.println("-----------------------------------------------------------");
 		}
 		
@@ -68,6 +75,10 @@ public class Runner {
 		System.out.printf("Summary statistics from %d runs:\n", numSimulations);
 		System.out.println();
 		System.out.printf("Overall profit: %f\n", totalProfit);
+
+//		System.out.println();
+//		System.out.printf("Test passed: %d/%d - %f\n", pass, numSimulations, 100.0*pass/numSimulations);
+
 	}
 	
 	/**

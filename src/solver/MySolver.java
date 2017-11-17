@@ -23,7 +23,7 @@ public class MySolver implements FundingAllocationAgent {
     private States states;
     private Actions actions;
 
-    private static double EPSILON = 0.00000000001;
+    private static double EPSILON = 1e-12;
 
     public MySolver(ProblemSpec spec) throws IOException {
         this.spec = spec;
@@ -47,7 +47,9 @@ public class MySolver implements FundingAllocationAgent {
         states = new States(ventures, maxManufacturing);
 
         for (int i = 0; i < states.states.length; i++) {
-            System.out.println(Arrays.toString(Arrays.stream(states.states[i]).map((x) -> x[0]).toArray()));
+            for (int j = 0; j < states.states[0].length; j++) {
+                System.out.println(Arrays.toString(states.states[i][j]));
+            }
         }
 
         System.out.println("-------------------------------------");
@@ -61,20 +63,6 @@ public class MySolver implements FundingAllocationAgent {
 
         for (Action action : actions.actions) {
             System.out.println(Arrays.toString(action.values));
-        }
-
-        // calculate all rewards
-
-        double[][] rewards = new double[ventures][length];
-
-        for (int i = 0; i < ventures; i++) {
-            for (int x = 0; x < length; x++) {
-                double reward = 0;
-                for (int y = 0; y < length; y++) {
-                    reward += probabilities.get(i).get(x, y) * sales.get(i) * (0.6 * Math.min(x, y) - 0.25 * Math.max(y - x, 0));
-                }
-                rewards[i][x] = reward;
-            }
         }
 
         // calculate all probabilities
@@ -98,6 +86,32 @@ public class MySolver implements FundingAllocationAgent {
                     probs[i][x][y] = pr;
                 }
             }
+        }
+
+        // calculate all rewards
+
+        double[][] rewards = new double[ventures][length];
+
+        for (int i = 0; i < ventures; i++) {
+            for (int x = 0; x < length; x++) {
+                double reward = 0;
+                for (int y = 0; y < length; y++) {
+                    reward += probabilities.get(i).get(x, y) * (0.6 * Math.min(x, y) - 0.25 * Math.max(y - x, 0));
+                }
+                rewards[i][x] = reward * sales.get(i);
+            }
+        }
+
+        System.out.println(Arrays.toString(rewards[0]));
+
+        System.out.println(Arrays.toString(rewards[1]));
+
+//        System.out.println(Arrays.toString(rewards[2]));
+
+
+
+        for (int i = 0; i < probs[0].length; i++) {
+            System.out.println(Arrays.toString(probs[0][i]));
         }
 
         // value iteration
@@ -171,9 +185,30 @@ public class MySolver implements FundingAllocationAgent {
         }
 
         for (int i = 0; i < states.states.length; i++) {
-            System.out.println(Arrays.toString(Arrays.stream(states.states[i]).map((x) -> x[0]).toArray()));
+            for (int j = 0; j < states.states[0].length; j++) {
+                System.out.println(Arrays.toString(states.states[i][j]));
+            }
         }
         System.out.println("Iterations: " + counter);
+
+        for (int k = 0; k < length2; k++) {
+            for (int j = 0; j < length; j++) {
+                for (int i = 0; i < length; i++) {
+                    if (i + j + k > maxManufacturing) {
+                        continue;
+                    }
+                    List<Integer> funds = new ArrayList<>();
+                    funds.add(i);
+                    funds.add(j);
+                    if (ventures == 3) {
+                        funds.add(k);
+                    }
+                    List<Integer> additional = generateAdditionalFundingAmounts(funds, 7);
+                    System.out.println(funds + " -> " + additional);
+                }
+            }
+        }
+//        System.out.println(generateAdditionalFundingAmounts(new ArrayList<Integer>(Arrays.asList(0,7,0)), 7));
     }
 
     public List<Integer> generateAdditionalFundingAmounts(List<Integer> manufacturingFunds,
@@ -200,7 +235,7 @@ public class MySolver implements FundingAllocationAgent {
 //			}
 //		}
 
-        double max = Double.MIN_VALUE;
+        double max = -Double.MAX_VALUE;
         Action best = null;
 
         for (Action action : actions.actions) {
@@ -209,7 +244,7 @@ public class MySolver implements FundingAllocationAgent {
             int j = manufacturingFunds.get(1) + action.values[1];
             int k = (manufacturingFunds.size() == 2) ? 0 : manufacturingFunds.get(2) + action.values[2];
 
-            if (i + j <= ventureManager.getMaxManufacturingFunds()) {
+            if (i + j + k <= ventureManager.getMaxManufacturingFunds()) {
                 if (states.states[i][j][k] > max) {
                     best = action;
                     max = states.states[i][j][k];
